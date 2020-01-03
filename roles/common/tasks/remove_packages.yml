@@ -1,0 +1,11 @@
+---
+- name: Remove unwanted packages
+  yum:
+    name:
+      - cloud-init
+      - cloud-utils-growpart
+      - polkit
+      - rpcbind
+      - wpa_supplicant
+    state: absent
+

@@ -1,0 +1,37 @@
+---
+
+- name: Slurp CA certificate
+  slurp:
+    src: /root/pki/ca.crt
+  register: ca_certificate
+
+- name: Slurp client certificate
+  slurp:
+    src: /root/pki/issued/{{ client_hostname.stdout }}.pem
+  register: client_certificate
+
+- name: Slurp client key
+  slurp:
+    src: /root/pki/private/{{ client_hostname.stdout }}.key
+  register: client_key
+
+- name: Slurp TLS auth
+  slurp:
+    src: /etc/openvpn/ta.key
+  register: tls_auth
+
+- name: Create client configuration from template
+  template:
+    src: ../templates/client.conf.j2
+    dest: /etc/openvpn/client/{{ client_hostname.stdout }}.conf
+    owner: root
+    group: root
+    mode: '0400'
+    backup: yes
+
+- name: Fetch client configuration
+  fetch:
+    src: /etc/openvpn/client/{{ client_hostname.stdout }}.conf
+    dest: ~/openvpn/client/{{ ansible_eth0.ipv4.address }}/
+    flat: yes
+

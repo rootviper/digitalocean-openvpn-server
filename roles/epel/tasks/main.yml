@@ -1,0 +1,14 @@
+---
+
+- name: Check if rpm is already installed
+  yum:
+    list: epel-release
+  register: yum_list
+
+- name: Install EPEL
+  yum:
+    name:
+      - https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm
+    state: present
+  when: yum_list.results | selectattr("yumstate", "match", "installed") | list | length == 0
+

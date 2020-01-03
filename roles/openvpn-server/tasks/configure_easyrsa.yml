@@ -1,0 +1,55 @@
+---
+
+- name: Check for an existing certificate authority
+  stat:
+    path: /root/pki
+  register: certificate_authority
+
+- name: Install pexpect
+  pip:
+    name: pexpect
+  when: not certificate_authority.stat.exists or not certificate_authority.stat.isdir
+
+- name: Configure easy-rsa to allow clientAuth
+  replace:
+    path: /usr/share/easy-rsa/3/x509-types/server
+    regexp: '^extendedKeyUsage = serverAuth$'
+    replace: 'extendedKeyUsage = serverAuth,clientAuth'
+    backup: yes
+
+- name: Initialize easy-rsa
+  command: /usr/share/easy-rsa/3/easyrsa init-pki
+  args:
+    creates: /root/pki
+
+- name: Build the certificate authority
+  expect:
+    command: /usr/share/easy-rsa/3/easyrsa --batch --req-cn=ca.security.sys build-ca
+    responses:
+      Enter New CA Key Passphrase: "{{ easyrsa_ca_passphrase }}"
+  no_log: true
+  when: not certificate_authority.stat.exists or not certificate_authority.stat.isdir
+
+
+- name: Generate server certificate signing request
+  expect:
+    command: /usr/share/easy-rsa/3/easyrsa --batch --req-cn=server.security.sys gen-req server nopass
+    responses:
+      Confirm request details: yes
+      Enter PEM pass phrase: "{{ easyrsa_server_passphrase }}"
+  no_log: true
+  when: not certificate_authority.stat.exists or not certificate_authority.stat.isdir
+
+- name: Sign server certificate signing request
+  expect:
+    command: /usr/share/easy-rsa/3/easyrsa --batch sign-req server server
+    responses:
+      Confirm request details: yes
+      Enter pass phrase for /root/pki/private/ca.key: "{{ easyrsa_ca_passphrase }}"
+  no_log: true
+  when: not certificate_authority.stat.exists or not certificate_authority.stat.isdir
+
+- name: Convert the server certificate to PEM format
+  command: openssl x509 -in /root/pki/issued/server.crt -outform PEM -out /root/pki/issued/server.pem
+  when: not certificate_authority.stat.exists or not certificate_authority.stat.isdir
+

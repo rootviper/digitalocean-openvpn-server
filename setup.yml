@@ -1,0 +1,17 @@
+---
+
+- hosts:
+    - digital_ocean
+  vars_prompt:
+    - name: "easyrsa_ca_passphrase"
+      prompt: "Create a CA private key passphrase"
+    - name: "easyrsa_server_passphrase"
+      prompt: "Create a server private key passphrase"
+  roles:
+    - check-status
+    - ssh
+    - epel
+    - common
+    - openvpn-server
+  gather_facts: no
+

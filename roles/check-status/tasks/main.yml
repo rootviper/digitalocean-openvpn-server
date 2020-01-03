@@ -1,0 +1,10 @@
+---
+
+- debug:
+    msg: "The play will end for hosts with 'destroyed' status"
+
+- name: End the play for hosts that have been destroyed
+  meta: end_host
+  when:
+  - status == 'destroyed'
+

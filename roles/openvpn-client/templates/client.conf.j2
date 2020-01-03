@@ -1,0 +1,28 @@
+client
+dev tun
+proto udp
+remote {{ ansible_eth0.ipv4.address }} {{ openvpn_port }}
+resolv-retry infinite
+nobind
+persist-key
+persist-tun
+remote-cert-tls server
+tls-auth [inline]
+cipher AES-256-CBC
+verb 3
+redirect-gateway def1
+auth-nocache
+mssfix 1350
+
+<ca>
+{{ ca_certificate['content'] | b64decode }}</ca>
+
+<cert>
+{{ client_certificate['content'] | b64decode }}</cert>
+
+<key>
+{{ client_key['content'] | b64decode }}</key>
+
+<tls-auth>
+{{ tls_auth['content'] | b64decode }}</tls-auth>
+

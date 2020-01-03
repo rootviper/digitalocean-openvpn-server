@@ -1,0 +1,7 @@
+- name: Setup SELinux to allow OpenVPN on a nonstandard port
+  seport:
+    ports: "{{ openvpn_port }}"
+    proto: "udp"
+    setype: "openvpn_port_t"
+    state: "present"
+

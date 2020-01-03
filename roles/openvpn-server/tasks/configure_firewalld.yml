@@ -1,0 +1,48 @@
+---
+
+- name: Start firewalld service
+  service:
+    name: firewalld
+    state: started
+
+- name: Place eth0 in public zone
+  firewalld:
+    zone: public
+    interface: eth0
+    permanent: yes
+    immediate: yes
+    state: enabled
+
+- name: Place tun0 interface in trusted zone
+  firewalld:
+    zone: trusted
+    state: enabled
+    interface: tun0
+    permanent: yes
+    immediate: yes
+
+- name: Masquerade public zone
+  firewalld:
+    masquerade: yes
+    state: enabled
+    permanent: yes
+    immediate: yes
+    zone: public
+
+- name: Open nonstandard OpenVPN port
+  firewalld:
+    zone: public
+    port: "{{ openvpn_port }}/udp"
+    permanent: yes
+    immediate: yes
+    state: enabled
+
+- name: Get public zone target
+  shell: firewall-cmd --get-target --zone=public --permanent
+  register: public_target
+
+- name: Set public target to DROP
+  shell: firewall-cmd --set-target DROP --zone public --permanent
+  when: public_target.stdout != 'DROP'
+  notify: Reload firewalld
+

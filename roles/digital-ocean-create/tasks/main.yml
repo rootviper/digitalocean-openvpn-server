@@ -1,0 +1,38 @@
+---
+
+- name: Create a new droplet using the DigitalOcean API
+  digital_ocean_droplet:
+    state: present
+    name: "{{ name }}"
+    oauth_token: "{{ oauth_token }}"
+    size: "{{ size }}"
+    region: "{{ region }}"
+    image: "{{ image }}"
+    wait: "{{ wait }}"
+    wait_timeout: "{{ wait_timeout }}"
+    ipv6: "{{ ipv6 }}"
+    monitoring: "{{ monitoring }}"
+    backups: "{{ backups }}"
+    private_networking: "{{ private_networking }}"
+    unique_name: "{{ unique_name }}"
+    ssh_keys: "{{ ssh_keys }}"
+  register: droplet
+
+- name: Create the backup directory if it does not exist
+  file:
+    path: "{{ backup_dir }}"
+    state: directory
+    mode: '0750'
+
+- name: Create backup of hosts file
+  copy:
+    src: "{{ hosts_file }}"
+    dest: "{{ backup_dir }}/{{ hosts_file }}-{{ '%Y%m%d-%H%M%S' | strftime }}"
+    mode: '0400'
+
+- name: Add the new host to the hosts file
+  script: add_host.py "{{ hosts_file }}" "{{ droplet.data.ip_address }}" "{{ droplet.data.droplet.id }}"
+
+- debug:
+    msg: "ID is {{ droplet.data.droplet.id }}, IP is {{ droplet.data.ip_address }}"
+

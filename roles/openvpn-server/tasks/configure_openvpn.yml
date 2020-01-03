@@ -1,0 +1,85 @@
+---
+
+- name: Check for an existing certificate authority
+  stat:
+    path: /root/pki
+  register: certificate_authority
+
+- name: Enable IP forwarding
+  sysctl:
+    name: net.ipv4.ip_forward
+    value: 1
+    sysctl_set: yes
+    state: present
+    reload: yes
+
+- name: Generate Diffie-Hellman parameters
+  command: /usr/bin/openssl dhparam -out /etc/openvpn/dh2048.pem 2048
+  args:
+    creates: /etc/openvpn/dh2048.pem
+
+- name: Set attributes for DH parameters file
+  file:
+    path: /etc/openvpn/dh2048.pem
+    owner: root
+    group: root
+    mode: 440
+
+- name: Generate ta.key
+  command: openvpn --genkey --secret /etc/openvpn/ta.key
+  args:
+    creates: /etc/openvpn/ta.key
+
+- name: Set attributes for ta.key
+  file:
+    path: /etc/openvpn/ta.key
+    owner: root
+    group: root
+    mode: 440
+
+- name: Slurp DH parameters
+  slurp:
+    src: /etc/openvpn/dh2048.pem
+  register: dh_parameters
+
+- name: Slurp CA certificate
+  slurp:
+    src: /root/pki/ca.crt
+  register: ca_certificate
+
+- name: Slurp server certificate
+  slurp:
+    src: /root/pki/issued/server.pem
+  register: server_certificate
+
+- name: Slurp server key
+  slurp:
+    src: /root/pki/private/server.key
+  register: server_key
+
+- name: Slurp TLS auth
+  slurp:
+    src: /etc/openvpn/ta.key
+  register: tls_auth
+
+- name: Create server.conf from template
+  template:
+    src: ../templates/server.conf.j2
+    dest: /etc/openvpn/server/server.conf
+    owner: root
+    group: root
+    mode: '0400'
+    backup: yes
+    force: no
+
+- name: Start openvpn service
+  systemd:
+    name: openvpn-server@server
+    state: restarted
+
+- name: Enable openvpn service
+  systemd:
+    name: openvpn-server@server
+    enabled: yes
+    masked: no
+

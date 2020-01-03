@@ -1,0 +1,9 @@
+---
+- name: Upgrade all packages
+  yum:
+    name: '*'
+    state: latest
+
+- name: Reboot the server and wait for it to complete
+  reboot:
+

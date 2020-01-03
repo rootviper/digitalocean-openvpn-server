@@ -1,0 +1,31 @@
+port {{ openvpn_port }}
+proto udp
+dev tun
+server {{ openvpn_pool_network }} {{ openvpn_pool_netmask }}
+push "dhcp-option DNS {{ openvpn_dns_server1 }}"
+push "dhcp-option DNS {{ openvpn_dns_server2 }}"
+ifconfig-pool-persist ipp
+keepalive 10 120
+tls-auth [inline]
+cipher AES-256-CBC
+persist-key
+persist-tun
+status openvpn-status.log
+verb 3
+explicit-exit-notify 1
+
+<dh>
+{{ dh_parameters['content'] | b64decode }}</dh>
+
+<ca>
+{{ ca_certificate['content'] | b64decode }}</ca>
+
+<cert>
+{{ server_certificate['content'] | b64decode }}</cert>
+
+<key>
+{{ server_key['content'] | b64decode }}</key>
+
+<tls-auth>
+{{ tls_auth['content'] | b64decode }}</tls-auth>
+

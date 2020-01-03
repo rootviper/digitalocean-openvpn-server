@@ -1,0 +1,35 @@
+all:
+  children:
+    digital_ocean:
+      hosts: {}
+      vars:
+        creation_defaults:
+          ansible_port: 23140
+          ansible_ssh_private_key_file: /home/someuser/.ssh/ansible-key
+          ansible_user: root
+          openvpn_port: 26312
+          ssh_port: 22889
+        openvpn_dns_server1: 1.1.1.1
+        openvpn_dns_server2: 9.9.9.9
+        openvpn_pool_netmask: 255.255.0.0
+        openvpn_pool_network: 192.168.0.0
+    digital_ocean_api:
+      hosts:
+        localhost:
+          ansible_connection: local
+          ansible_python_interpreter: python
+      vars:
+        backup_dir: archive
+        backups: false
+        image: centos-7-x64
+        ipv6: false
+        monitoring: false
+        name: openvpn
+        oauth_token: 0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef
+        private_networking: false
+        region: nyc1
+        size: s-1vcpu-1gb
+        ssh_keys: 01234567
+        unique_name: false
+        wait: true
+        wait_timeout: 120

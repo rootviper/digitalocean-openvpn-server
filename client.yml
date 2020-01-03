@@ -1,0 +1,11 @@
+---
+- hosts:
+    - digital_ocean
+  vars_prompt:
+    - name: "easyrsa_ca_passphrase"
+      prompt: "Enter the CA private key passphrase"
+    - name: "easyrsa_client_passphrase"
+      prompt: "Create a client private key passphrase"
+  roles:
+    - openvpn-client
+

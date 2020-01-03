@@ -1,0 +1,25 @@
+---
+
+- name: Create the backup directory if it does not exist
+  file:
+    path: "{{ backup_dir }}"
+    state: directory
+    mode: '0750'
+
+- name: Create a backup of the host file
+  copy:
+    src: "{{ hosts_file }}"
+    dest: "{{ backup_dir }}/{{ hosts_file }}-{{ '%Y%m%d-%H%M%S' | strftime }}"
+    mode: '0400'
+
+- name: Add the new host to the hosts file
+  script: remove_host.py "{{ hosts_file }}" "{{ droplet_id }}"
+
+- name: Destroy a droplet using the DigitalOcean API
+  digital_ocean_droplet:
+    state: absent
+    id: "{{ droplet_id }}"
+    name: "{{ name }}"
+    oauth_token: "{{ oauth_token }}"
+  register: droplet
+

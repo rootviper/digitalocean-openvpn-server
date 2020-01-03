@@ -1,0 +1,9 @@
+---
+- name: Install packages
+  yum:
+    name:
+      - easy-rsa
+      - openvpn
+      - python2-pip
+    state: present
+

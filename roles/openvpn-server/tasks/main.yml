@@ -1,0 +1,9 @@
+---
+
+- include: install_packages.yml
+- include: configure_easyrsa.yml
+- include: configure_selinux.yml
+- include: configure_openvpn.yml
+- include: configure_firewalld.yml
+- include: start_services.yml
+

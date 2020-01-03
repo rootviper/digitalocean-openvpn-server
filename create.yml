@@ -1,0 +1,9 @@
+---
+- hosts:
+    - digital_ocean_api
+  roles:
+    - digital-ocean-create
+  vars:
+    hosts_file: hosts.yml
+  gather_facts: no
+

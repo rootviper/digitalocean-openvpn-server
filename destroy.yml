@@ -1,0 +1,13 @@
+---
+- hosts:
+    - digital_ocean_api
+  vars_prompt:
+    name: droplet_id
+    prompt: "Enter the droplet ID to destroy"
+    private: no
+  roles:
+    - digital-ocean-destroy
+  vars:
+    hosts_file: hosts.yml
+  gather_facts: no
+

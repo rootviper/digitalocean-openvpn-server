@@ -1,0 +1,25 @@
+---
+
+- name: Create a random hostname for the client
+  shell: head /dev/urandom | tr -dc a-z0-9 | head -c 12
+  register: client_hostname
+
+- name: Generate client certificate signing request
+  expect:
+    command: "/usr/share/easy-rsa/3/easyrsa --batch --req-cn={{ client_hostname.stdout }}.client gen-req {{ client_hostname.stdout }} nopass"
+    responses:
+      Confirm request details: yes
+      Enter PEM pass phrase: "{{ easyrsa_client_passphrase }}"
+  no_log: true
+
+- name: Sign client certificate signing request
+  expect:
+    command: "/usr/share/easy-rsa/3/easyrsa --batch sign-req client {{ client_hostname.stdout }}"
+    responses:
+      Confirm request details: yes
+      Enter pass phrase for /root/pki/private/ca.key: "{{ easyrsa_ca_passphrase }}"
+  no_log: true
+
+- name: Convert the client certificate to PEM format
+  command: "openssl x509 -in /root/pki/issued/{{ client_hostname.stdout }}.crt -outform PEM -out /root/pki/issued/{{ client_hostname.stdout }}.pem"
+
